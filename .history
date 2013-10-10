@@ -1,0 +1,50 @@
+tar -cf BUFRdecode_ADPsfc.tar bufrdecode
+ls -l
+vi index.html
+pwd
+cd /huron/user/schuster/datasets/tigge
+ls
+cd software
+ls
+more README
+viewordusage DWES -t ds330.2 -D 2008-07-01
+viewwebusage DWESF -t ds330.2 -D 2008-08-01
+h
+viewwebusage DWESF -t ds330.3 -D 2008-08-15
+h
+viewwebusage DWESF -t ds335.0 ds336.0 -D 2008-08-15
+h
+viewwebusage DWESF -t ds337.0 -D 2008-08-15
+viewwebusage DWESF -t ds351.0 ds351.1 -D 2008-08-15
+h
+viewwebusage DWESF -t ds461.0 ds461.1 -D 2008-08-15
+cd /huron/ftp/download/schuster
+ls
+more README
+ls
+vi tiggegustav.ncl
+cut
+extract
+gimp
+man gimp
+ls
+pwd
+cd
+ls
+cd /huron/ftp/download/schuster
+ls
+ls png
+convert gustavghq_0024.ps gustavghq_0024.pdf
+convert gustavghq_0024.pdf gustavghq_0024.png
+df
+oihuexit
+exit
+exit
+convert | more
+convert | more
+ls
+ssh dsspub
+finger
+ps -u schuster
+exit
+exit
