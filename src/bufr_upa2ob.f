@@ -23,6 +23,7 @@
         character*6 dname,staid(nz),M20
         character*3 ilev
         character*8 M1,M2,min,M3,M4,M5,xlat,xlon
+        real wlon,elon,slat,nlat
 
         CHARACTER       cbfmsg*(MXBF),
      +                  csubset*8, inf*200,outstg*211
@@ -39,16 +40,41 @@
         ostr(2)='HOUR MINU CLAT CLON SELV'
         ostr(3)='TMDB TMDP PRLC WDIR WSPD'
     
-        n = iargc() 
+C*-----------------------------------------------------------------------
+c*    Read the command-line arguments
+c*      
+        n = iargc()
+        IF (n .GE. 2) THEN
+          call getarg( 1, argv )
+          inf=argv
+          call getarg(2,argv)
+          date_tag=argv
+          IF (n .eq. 6) THEN  ! User-specified lat/lon boundaries
+            call getarg(3,argv)
+            read(argv,*) wlon
+            call getarg(4,argv)
+            read(argv,*) elon
+            call getarg(5,argv)
+            read(argv,*) slat
+            call getarg(6,argv)
+            read(argv,*) nlat
+            write(*,*) 'Lon/lat boundaries: ',wlon,elon,slat,nlat
+          ELSE  ! Default lon/lat boundaries
+            slat = -90.
+            nlat = 90.
+            wlon = -180.
+            elon = 180.
+          END IF
+        ELSE
+          write(*,*) 'Usage: bufr_aircar2ob.x gdas.adpsfc.t<HH>z.
+     +<YYYYMMDD>.bufr.be <YYYYMMDDHH> west_lon east_lon 
+     +south_lat north_lat'
+          STOP
+        END IF
 
 C*-----------------------------------------------------------------------
 
 C*      Open the BUFR messages file.
-
-        call getarg( 1, argv )  
-        inf=argv
-        call getarg(2,argv)
-        date_tag=argv
 
 c*        write(*,*) 'enter input BUFR file?'
 c*        read(*,'(a)') inf 
@@ -70,12 +96,6 @@ C*      Open output file
 
         iflag = 0
         dumm=99999.9
-
-! Set Desired area
-        slat = -90.
-        nlat = 90.
-        wlon = -180.
-        elon = 180.
 
         iupper = 0
         ibogus = 0
@@ -112,7 +132,7 @@ C*          Read the next BUFR message.
            call readns(11,csubset,idate,ierr)
 C*           code = IUPBS1(MBAY,33) 
 C*            write(*,*)' idate: ',idate,'  ',csubset,' ',code
-            write(*,*)' idate: ',idate,'  ',csubset
+c            write(*,*)' idate: ',idate,'  ',csubset
             IF  ( ierr .eq.  -1 )  THEN
                 write(*,*) '....all records read, Exit'
                 CALL CLOSBF  ( 11 )

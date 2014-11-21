@@ -24,6 +24,7 @@
         character   argv*300,minute*2,M11*2,mins(nz)*2
         character*12 ilev,xy,xm,xd,xh,xmin,M5,M6,M7,M8
         character*12 M10,M1,M2,min,M3,M4,xn1,xn2,xn3,xn4,M9
+        real wlon,elon,slat,nlat
 
         CHARACTER       cbfmsg*(MXBF),
      +                  csubset*8, inf*200, outstg*200
@@ -41,7 +42,37 @@
         ostr(3)='CLAT CLON PRLC IALT'
         ostr(4)='MIXR REHU TMDB WDIR WSPD'
 
+C*-----------------------------------------------------------------------
+c*    Read the command-line arguments
+c*      
         n = iargc()
+        IF (n .GE. 2) THEN
+          call getarg( 1, argv )
+          inf=argv
+          call getarg(2,argv)
+          date_tag=argv
+          IF (n .eq. 6) THEN  ! User-specified lat/lon boundaries
+            call getarg(3,argv)
+            read(argv,*) wlon
+            call getarg(4,argv)
+            read(argv,*) elon
+            call getarg(5,argv)
+            read(argv,*) slat
+            call getarg(6,argv)
+            read(argv,*) nlat
+            write(*,*) 'Lon/lat boundaries: ',wlon,elon,slat,nlat
+          ELSE  ! Default lon/lat boundaries
+            slat = -90.
+            nlat = 90.
+            wlon = -180.
+            elon = 180.
+          END IF
+        ELSE
+          write(*,*) 'Usage: bufr_aircar2ob.x gdas.adpsfc.t<HH>z.
+     +<YYYYMMDD>.bufr.be <YYYYMMDDHH> west_lon east_lon 
+     +south_lat north_lat'
+          STOP
+        END IF
 
 !************************************
         !processing start from below
@@ -69,11 +100,6 @@ c*        read(*,fmt='(a10)') date_tag
         iflag = 0
       nlev = 1
         dumm=99999.9
-! Set desired area
-        slat = -90.
-        nlat = 90.
-        wlon = -180.
-        elon = 180.
 
         isurf = 0
         ibogus = 0
@@ -117,7 +143,7 @@ C*          Read the next BUFR message.
            call readns(11,csubset,idate,ierr)
 C*           code = IUPBS1(MBAY,33) 
 C*            write(*,*)' idate: ',idate,'  ',csubset,' ',code
-            write(*,*)' idate: ',idate,'  ',csubset
+c            write(*,*)' idate: ',idate,'  ',csubset
             IF  ( ierr .eq.  -1 )  THEN
                 write(*,*) '....all records read.'
                 CALL CLOSBF  ( 11 )
