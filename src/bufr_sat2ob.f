@@ -10,7 +10,7 @@
 
         PARAMETER       ( MXBF = 16000 )
 
-        parameter(iu=9,iou=10,nz=999999)
+        parameter(iu=9,iou=10,nz=9999999)
 
         dimension pr(nz),tt(nz),td(nz)
         integer  xht,nlev,i, iargc, n,minu,k
@@ -68,19 +68,16 @@ c*
             elon = 180.
           END IF
         ELSE
-          write(*,*) 'Usage: bufr_aircar2ob.x gdas.adpsfc.t<HH>z.
-     +<YYYYMMDD>.bufr.be <YYYYMMDDHH> west_lon east_lon 
+          write(*,*) 'Usage: bufr_sat2ob.x gdas.satwnd.t<HH>z.
+     +<YYYYMMDD>.bufr <YYYYMMDDHH> west_lon east_lon 
      +south_lat north_lat'
           STOP
         END IF
 
 C*-----------------------------------------------------------------------
 
-C*      Open the BUFR messages file.
-
-c*        write(*,*) 'enter input BUFR file?'
-c*        read(*,'(a)') inf 
-        OPEN  ( UNIT = 11, FILE =inf,form='unformatted' )
+C*      Open the BUFR messages file
+        OPEN (UNIT=11, FILE=inf, form='unformatted')
 
 c*        write(*,*) 'Date_tag (YYYYMMDDHH) : '
 c*        read(*,fmt='(a10)') date_tag
@@ -88,12 +85,7 @@ c*        read(*,fmt='(a10)') date_tag
         dname=' SATOB'
         fout= "Satob"//date_tag//'.obs'
 
-C*      Open the BUFR tables file.
-
-C*        OPEN  ( UNIT = 12, FILE = 'bufrtab.example' )
-
 C*      Open output file
-
         open(iou,file=fout,status='unknown',form='formatted')
 
         iflag = 0
@@ -115,10 +107,12 @@ C*      Open output file
           v(k)=dumm
         enddo
 
-C*      Associate the tables file with the messages file, and identify
-C*      the latter to the BUFRLIB software.
+C*      Identify BUFR file to the BUFRLIB software.  DX BUFR tables
+C*      are embedded within the first few messages of the BUFR file
+C*      itself, thus we logical unit for the BUFR tables file is the 
+C*      same as the BUFR file itself.
 
-        CALL OPENBF  ( 11, 'IN', 11 )
+        CALL OPENBF  (11, 'IN', 11)
 
 C*      Specify that we would like IDATE values returned using 10 digits
 C*      (i.e. YYYYMMDDHHMM ).
@@ -127,13 +121,12 @@ C*      (i.e. YYYYMMDDHHMM ).
      
         ln=0 
 
+C*-----------------------------------------------------------------------
         DO WHILE  ( .true. )
 
 C*          Read the next BUFR message.
 
            call readns(11,csubset,idate,ierr)
-C*           code = IUPBS1(MBAY,33) 
-C*            write(*,*)' idate: ',idate,'  ',csubset,' ',code
 c            write(*,*)' idate: ',idate,'  ',csubset
             IF  ( ierr .eq.  -1 )  THEN
                 write(*,*) '....all records read, Exit'
@@ -143,26 +136,31 @@ c            write(*,*)' idate: ',idate,'  ',csubset
 
             msgok = .true.
 
-
             DO WHILE  ( msgok )
 
+C*		    Read the next data subset from the BUFR message.
+		    IF (IREADSB (11) .ne. 0) THEN
+		        msgok = .false.
+		    ELSE
 
 C*            At this point, we have a data subset within the
 C*            internal arrays of BUFRLIB, and we can now begin
 C*            reading actual data values:
 
-
               CALL UFBINT  ( 11, r8arr, MXMN, MXLV, nlv, ostr(1))
               CALL UFBINT  ( 11, r8arr2, MXMN, MXLV, nlv, ostr(2))
               CALL UFBINT  ( 11, r8arr3, MXMN, MXLV, nlv, ostr(3))
               CALL UFBINT  ( 11, r8arr4, MXMN, MXLV, nlv, ostr(4))
+
             minu=int(r8arr3(2,1))
             write (unit=minute, FMT='(I2)') minu
+
             DO k=1,2
                IF ( minute (k:k) .eq. ' ') THEN
                  minute (k:k) = '0'
                ENDIF
             ENDDO
+
             DO z = 1,nlv
               WRITE (UNIT=outstg, FMT='(I10,1x,A8, 
      +          3(1X,F5.1),1X,A8,1X,F5.1, 
@@ -176,7 +174,7 @@ C*            reading actual data values:
                ENDIF
               ENDDO
 
-              read(outstg,21,end=1000)M10,M1,M2,M3,M4,M5,M6
+              read(outstg,21,end=1000) M10,M1,M2,M3,M4,M5,M6
               read(minute,22) M11
 
 21            format(A10,76X,A6,1X,A7,1X,A6,1X,A7,1X,A5,2X,A5)            
@@ -198,21 +196,14 @@ C*            reading actual data values:
                 pr(j)= pr(j)/100
               end if
 
-            ENDDO           
-
-
-              CALL READSB  ( 11, ierrsb )
-
-              IF  ( ierrsb .ne. 0 )  THEN
-
-                  msgok = .false.
-
-              ELSE
-              END IF
-
+            END DO           
+            END IF
             END DO
-
         END DO
+
+C*-----------------------------------------------------------------------
+C* Write to output file
+C*-----------------------------------------------------------------------
 
 1000    if (iflag .ne. 0) then
           write(iou,fmt='(a10)') date_tag
@@ -229,9 +220,12 @@ C*            reading actual data values:
 112      format(6(f7.1,1x))
 
         endif
+
 2000    stop 99999        
 
         END
+
+C*-----------------------------------------------------------------------
 
       SUBROUTINE READMval(M1,fl)
            character*8 M1

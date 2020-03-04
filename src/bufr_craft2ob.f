@@ -11,7 +11,7 @@
 
         PARAMETER       ( MXBF = 16000 )
 
-        parameter(iu=9,iou=10,nz=999999)
+        parameter(iu=9,iou=10,nz=9999999)
 
         dimension pr(nz),tt(nz),td(nz),zx1(nz),zx2(nz)
 

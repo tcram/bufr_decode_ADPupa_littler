@@ -10,7 +10,7 @@
 
         PARAMETER       ( MXBF = 16000 )
 
-        parameter(iu=9,iou=10,nz=999999)
+        parameter(iu=9,iou=10,nz=9999999)
         dimension pr(nz),tt(nz),td(nz)
         integer  xht,nlev,i, iargc, n,minu,k
         real  xu,xv,xy,xm,xh,xmm,xd
