@@ -48,33 +48,33 @@
 
 c*      write(*,*)'give the filename for datafile list :'
 c*	read(*,fmt='(a30)')fn
-	open(1,file=fn,form='formatted',status='old')
 
-	m = iunit
-	do i=1,10
-      read(1,fmt='(a30)',end=222)fin(i)
-	open(m,file=fin(i),status='old',form='formatted')
-	m = m + 1
-	enddo
+	  open(1,file=fn,form='formatted',status='old')
 
-c*222   write(*,*)'What is time tag (YYYY-MM-DD_HH): '
+	  m = iunit
+	  do i=1,10
+        read(1,fmt='(a30)',end=222) fin(i)
+	    open(m,file=fin(i),status='old',form='formatted')
+	    m = m + 1
+	  enddo
+
+c*222   write(*,*)'Enter timestamp (YYYY-MM-DD_HH): '
 c*      read(*,fmt='(a13)')time_tag
 
-222      fout1 = 'OBS:'//time_tag
+222   fout1 = 'OBS:'//time_tag
       fout2 = 'SURFACE_OBS:'//time_tag
-	open(iounit1,file=fout1,status='unknown')
-	open(iounit2,file=fout2,status='unknown')
-!
-!  start of file reading loop
-!
+	  open(iounit1,file=fout1,status='unknown')
+	  open(iounit2,file=fout2,status='unknown')
+
+c-----7---------------------------------------------------------------72
+c  start of file reading loop
       i = 1
 
       do 333 iu=iunit,m-1
-      read(iu,fmt='(i10)') mdatea
-!
-!  reading a file in the list
+        write(*,*) "reading file: ", fin(i)
+        read(iu,fmt='(i10)') mdatea
 
-
+c-----7---------------------------------------------------------------72
       do 444 iter =1,99999
 
       call miss(kx,p,z,t,td,spd,dir,slp,ter,dname,staid)
@@ -82,14 +82,14 @@ c*      read(*,fmt='(a13)')time_tag
      & xlat,xlon,dname,staid,bogus,iflag,mdate)
       call wmo_codename(isurf,dname,codestr) 
       stndesc = ' '//staid//'     get data information here.  ' 
-	if (iflag .eq. 0)then
+	  if (iflag .eq. 0)then
         write(*,111)fin(i)
 111   format('finished file : ',a30)
         i=i+1
         goto 333
-        endif
+      endif
 
-! Set desired area
+c Set desired area
 
       if(xlat .ge. -90.0 .and. xlat .le. 90.0 ) then
       if(xlon .ge. -180.0 .and. xlon .le. 180.0 ) then 
@@ -122,30 +122,34 @@ c*      read(*,fmt='(a13)')time_tag
 
 20    stop 99999
       end
-!
-!  Subroutine to fill -888888. in place of missing data
-!
+
+c-----7---------------------------------------------------------------72
+c  Subroutine to fill -888888. in place of missing data
+
       subroutine miss(kx,p,z,t,td,spd,dir,slp,ter,dname,staid)
       real p(kx),z(kx),t(kx),td(kx),spd(kx),dir(kx)
       character*6 dname,staid
 
       do k=1,kx
-      p(k)=-888888.
-      z(k)=-888888.
-      t(k)=-888888.
-      td(k)=-888888.
-      spd(k)=-888888.
-      dir(k)=-888888.
+        p(k)=-888888.
+        z(k)=-888888.
+        t(k)=-888888.
+        td(k)=-888888.
+        spd(k)=-888888.
+        dir(k)=-888888.
       enddo
+
       slp=-888888.
       ter=-888888.
       dname = '99001 '
       staid = '99001 '
+
       return
       end
-!
-! subroutine to read data from file unit
-!
+
+c-----7---------------------------------------------------------------72
+c subroutine to read data from file unit
+
       subroutine getdat(iunit,isurf,nlev,p,z,t,td,spd,dir,slp,ter,
      &  xlat,xlon,dname,staid,bogus,iflag,mdate)
 
@@ -161,63 +165,76 @@ c*      read(*,fmt='(a13)')time_tag
 
       read(iunit,113,end=1000)isurf,dname,staid,mdate,xlat,
      &     xlon,xter,xslp,nlev,ibogus
-113    format(i1,1x,a6,1x,a6,1x,a12,4(f7.1,1x),i3,1x,i1)
+113   format(i1,1x,a6,1x,a6,1x,a12,4(f7.1,1x),i3,1x,i1)
+
       if (xter .ne. dmiss) ter = xter
       if (xslp .ne. dmiss) slp = xslp*100.
-
       if(ibogus.eq.0) bogus=.FALSE.
 
-      if (isurf .eq. 1)then
+      if (isurf .eq. 1) then
         do kk=1,nlev
-
           read(iunit,114,end=1000) px(kk),zx(kk),tx(kk),tdx(kk),
      &    dirx(kk),spdx(kk)
 
           if (px(kk) .ne. dmiss) p(kk) = px(kk)*100.
-     
-	  if (zx(kk) .ne. dmiss) z(kk) = zx(kk)
-
-	  if (tx(kk) .ne. dmiss) t(kk) = tx(kk)
-  
-          if (tdx(kk) .ne. dmiss) td(kk) = tdx(kk) 
-
-	  if (dirx(kk) .ne. dmiss) dir(kk) = dirx(kk)
-
-	  if (spdx(kk) .ne. dmiss) spd(kk) = spdx(kk)
-
+	      if (zx(kk) .ne. dmiss) z(kk) = zx(kk)
+	      if (tx(kk) .ne. dmiss) t(kk) = tx(kk)
+          if (tdx(kk) .ne. dmiss) td(kk) = tdx(kk)
+	      if (dirx(kk) .ne. dmiss) dir(kk) = dirx(kk)
+	      if (spdx(kk) .ne. dmiss) spd(kk) = spdx(kk)
         enddo
-
       else
-
-	do kk=1,nlev
-
-	  read(iunit,114,end=1000) px(kk),zx(kk),tx(kk),tdx(kk),
-     &  dirx(kk),spdx(kk)
+	    do kk=1,nlev
+	      read(iunit,114,end=1000) px(kk),zx(kk),tx(kk),tdx(kk),
+     &       dirx(kk),spdx(kk)
           
-        if (px(kk) .ne. dmiss) p(kk) = px(kk)*100.
-
-	  if (zx(kk) .ne. dmiss) z(kk) = zx(kk)
-
-	  if (tx(kk) .ne. dmiss) t(kk) = tx(kk)
-
+          if (px(kk) .ne. dmiss) p(kk) = px(kk)*100.
+	      if (zx(kk) .ne. dmiss) z(kk) = zx(kk)
+	      if (tx(kk) .ne. dmiss) t(kk) = tx(kk)
           if (tdx(kk) .ne. dmiss) td(kk) = tdx(kk) 
-
-	  if (dirx(kk) .ne. dmiss) dir(kk) = dirx(kk)
-
-	  if (spdx(kk) .ne. dmiss) spd(kk) = spdx(kk)
-
-	enddo
-
+	      if (dirx(kk) .ne. dmiss) dir(kk) = dirx(kk)
+	      if (spdx(kk) .ne. dmiss) spd(kk) = spdx(kk)
+	    enddo
       endif
 
-	iflag = 1
-	goto 2000
+	  iflag = 1
+	  goto 2000
 
-114    format(6(f7.1,1x))
-1000	iflag = 0
+114   format(6(f7.1,1x))
+1000  iflag = 0
+
 2000  return
+
       end
-!   Subroutine to put WMO code for each type of data
+
+c-----7---------------------------------------------------------------72
+c   Subroutine to put WMO code for each type of data
+c
+c   Given the WMO code fm, return the observation platform type and increment
+c   the corresponding counter if present.
+c
+c Returned platforms are reduced to 13 output classes:
+c
+c   Name    WMO Codes     WMO Code names
+c   synop    12,14       'SYNOP','SYNOP MOBIL'
+c   ship     13          'SHIP'
+c   metar    15,16       'METAR','SPECI'
+c   buoy     18          'BUOY'
+c   pilot    32,33,34    'PILOT','PILOT SHIP','PILOT MOBIL'
+c   sound    35,36,37,38 'TEMP','TEMP SHIP, 'TEMP DROP','TEMP MOBIL'
+c   amdar    42          'AMDAR'
+c   satem    86          'SATEM'
+c   satob    88          'SATOB'
+c   airep    96,97       'AIREP'
+c   gpspw    111         'GPSPW'
+c   ssmt1    121         'SSMT1'
+c   ssmt2    122         'SSMT2'
+c   ssmi     125,126     'SSMI'
+c   tovs     131         'TOVS'
+c   qscat    281         'Quikscat'
+c   profl    132         'Profilers'
+c   other Any other code 'UNKNOWN'
+c-----7---------------------------------------------------------------72
       
       subroutine wmo_codename(isurf,dname,codestr) 
       
@@ -259,38 +276,13 @@ c*      read(*,fmt='(a13)')time_tag
       endif
 
       endif
-!------------------------------------------------------------------------------!
-! Given the WMO code fm, return the observation platform type and increment
-! the corresponding counter if present.
-!
-! Returned platforms are reduced to 13 output classes:
-!
-!   Name    WMO Codes     WMO Code names
-!   synop    12,14       'SYNOP','SYNOP MOBIL'
-!   ship     13          'SHIP'
-!   metar    15,16       'METAR','SPECI'
-!   buoy     18          'BUOY'
-!   pilot    32,33,34    'PILOT','PILOT SHIP','PILOT MOBIL'
-!   sound    35,36,37,38 'TEMP','TEMP SHIP, 'TEMP DROP','TEMP MOBIL'
-!   amdar    42          'AMDAR'
-!   satem    86          'SATEM'
-!   satob    88          'SATOB'
-!   airep    96,97       'AIREP'
-!   gpspw    111         'GPSPW'
-!   ssmt1    121         'SSMT1'
-!   ssmt2    122         'SSMT2'
-!   ssmi     125,126     'SSMI'
-!   tovs     131         'TOVS'
-!   qscat    281         'Quikscat'
-!   profl    132         'Profilers'
-!   other Any other code 'UNKNOWN'
-!------------------------------------------------------------------------------!
+
       return
       end
 
-!
-!  Subroutine to write data in a specified format for little_r
-!
+c-----7---------------------------------------------------------------72
+c  Subroutine to write data in a specified format for little_r
+
       SUBROUTINE write_obs ( p , z , t , td , spd , dir , 
      &                      slp , ter , xlat , xlon , mdate , kx , 
      & string1 , string2 , string3 , string4 , bogus , iseq_num ,
@@ -306,10 +298,9 @@ c*      read(*,fmt='(a13)')time_tag
       CHARACTER *22  meas_format 
       CHARACTER *14  end_format
       logical bogus
-! changed Osuri
+c changed Osuri
       iseq_num =0      
-! changed Osuri end
-
+c changed Osuri end
 
       rpt_format =  ' ( 2f20.5 , 2a40 , '
      &             // ' 2a40 , 1f20.5 , 5i10 , 3L10 , '
@@ -317,11 +308,11 @@ c*      read(*,fmt='(a13)')time_tag
       meas_format =  ' ( 10( f13.5 , i7 ) ) '
       end_format = ' ( 3 ( i7 ) ) ' 
       write (date_char(7:18),fmt='(a12)') mdate
-!     if (mdate/1000000 .GT. 70 ) then
-!        date_char(7:8)='19'
-!     else
-!        date_char(7:8)='20'
-!     endif
+c     if (mdate/1000000 .GT. 70 ) then
+c        date_char(7:8)='19'
+c     else
+c        date_char(7:8)='20'
+c     endif
       date_char(19:20)='00'
       date_char(1:6)='      '
 
