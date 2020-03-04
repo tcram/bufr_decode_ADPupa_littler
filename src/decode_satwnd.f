@@ -10,7 +10,7 @@
 
         PARAMETER       ( MXBF = 16000 )
 
-        parameter(iu=9,iou=10,nz=999999)
+        parameter(iu=9,iou=10,nz=9999999)
 
         dimension pr(nz),tt(nz),td(nz)
         integer  xht,nlev,i, iargc, n,minu,k
@@ -68,7 +68,7 @@ c*
             elon = 180.
           END IF
         ELSE
-          write(*,*) 'Usage: bufr_satwnd2ob.x gdas.satwnd.t<HH>z.
+          write(*,*) 'Usage: decode_satwnd.x gdas.satwnd.t<HH>z.
      +<YYYYMMDD>.bufr <YYYYMMDDHH> west_lon east_lon 
      +south_lat north_lat'
           STOP
@@ -122,7 +122,7 @@ C*      (i.e. YYYYMMDDHHMM ).
 
 C*          Read the next BUFR message.
 
-           call readns(11,csubset,idate,ierr)
+           call readns(11, csubset, idate, ierr)
 
 c            write(*,*)' idate: ',idate,'  ',csubset
 
@@ -133,18 +133,6 @@ c            write(*,*)' idate: ',idate,'  ',csubset
             END IF
 
             msgok = .true.
-
-C*	    Pass the BUFR message into the BUFRLIB software.
-
-	        CALL READERME  ( ibfmsg, 11, csubset, idate, ierrme )
-
-	        IF  ( ierrme .ne. 0 )  THEN
-		        PRINT *, 'Error reading BUFR message within READERME'
-		        msgok = .false.
-	        ELSE IF  ( csubset .ne. 'NC002007' )  THEN
-		        PRINT *, 'BUFR message is not of type WIND PROFILER'
-		        msgok = .false.
-	        END IF
 
             DO WHILE  ( msgok )
 
@@ -158,10 +146,10 @@ C*            At this point, we have a data subset within the
 C*            internal arrays of BUFRLIB, and we can now begin
 C*            reading actual data values:
 
-              CALL UFBINT  ( 11, r8arr, MXMN, MXLV, nlv, ostr(1))
-              CALL UFBINT  ( 11, r8arr2, MXMN, MXLV, nlv, ostr(2))
-              CALL UFBINT  ( 11, r8arr3, MXMN, MXLV, nlv, ostr(3))
-              CALL UFBINT  ( 11, r8arr4, MXMN, MXLV, nlv, ostr(4))
+              CALL UFBINT (11, r8arr,  MXMN, MXLV, nlv, ostr(1))
+              CALL UFBINT (11, r8arr2, MXMN, MXLV, nlv, ostr(2))
+              CALL UFBINT (11, r8arr3, MXMN, MXLV, nlv, ostr(3))
+              CALL UFBINT (11, r8arr4, MXMN, MXLV, nlv, ostr(4))
 
             minu = int(r8arr3(2,1))
             write (unit=minute, FMT='(I2)') minu
@@ -184,7 +172,7 @@ C*            reading actual data values:
                  outstg (y:y) = 'm'
                ENDIF
               ENDDO
-
+              
               read(outstg, 21, end=1000) M10,M1,M2,M3,M4,M5,M6
               read(minute, 22) M11
 
@@ -194,12 +182,12 @@ C*            reading actual data values:
               iflag = iflag+1
               j = iflag
 
-              CALL READMval(M1,lat(j))
-              CALL READMval(M2,lon(j))
-              CALL READMval(M3,tt(j))
-              CALL READMval(M4,pr(j))
-              CALL READMval(M5,d(j))
-              CALL READMval(M6,v(j))
+              CALL READMval(M1, lat(j))
+              CALL READMval(M2, lon(j))
+              CALL READMval(M3, tt(j))
+              CALL READMval(M4, pr(j))
+              CALL READMval(M5, d(j))
+              CALL READMval(M6, v(j))
 
               date(j) = M10
               mins(j) = M11
