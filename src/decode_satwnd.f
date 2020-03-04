@@ -35,7 +35,7 @@
 
         LOGICAL         msgok
 
-        EQUIVALENCE     ( cbfmsg (1), ibfmsg (1) )
+        EQUIVALENCE     ( cbfmsg (1:4), ibfmsg (1) )
 
         ostr(1)='SAID GCLONG SCLF RPID'
         ostr(2)='SIDP SWCM YEAR MNTH DAYS'
