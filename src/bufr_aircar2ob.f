@@ -9,7 +9,7 @@
      +                  r8arr3 ( MXMN, MXLV ), r8arr4(MXMN, MXLV ) 
 
         PARAMETER       ( MXBF = 16000 )
-        PARAMETER       (iu=9,iou=10,nz=999999)
+        PARAMETER       (iu=9,iou=10,nz=9999999)
  
         dimension pr(nz),tt(nz),td(nz)         
 

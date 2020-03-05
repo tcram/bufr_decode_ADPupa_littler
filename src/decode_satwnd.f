@@ -68,7 +68,7 @@ c*
             elon = 180.
           END IF
         ELSE
-          write(*,*) 'Usage: bufr_sat2ob.x gdas.satwnd.t<HH>z.
+          write(*,*) 'Usage: decode_satwnd.x gdas.satwnd.t<HH>z.
      +<YYYYMMDD>.bufr <YYYYMMDDHH> west_lon east_lon 
      +south_lat north_lat'
           STOP
@@ -76,11 +76,8 @@ c*
 
 C*-----------------------------------------------------------------------
 
-C*      Open the BUFR messages file
-        OPEN (UNIT=11, FILE=inf, form='unformatted')
-
-c*        write(*,*) 'Date_tag (YYYYMMDDHH) : '
-c*        read(*,fmt='(a10)') date_tag
+C*      Open the BUFR file
+        OPEN (UNIT = 11, FILE=inf, form='unformatted')
 
         dname=' SATOB'
         fout= "Satob"//date_tag//'.obs'
@@ -112,7 +109,7 @@ C*      are embedded within the first few messages of the BUFR file
 C*      itself, thus we logical unit for the BUFR tables file is the 
 C*      same as the BUFR file itself.
 
-        CALL OPENBF  (11, 'IN', 11)
+        CALL OPENBF  ( 11, 'IN', 11 )
 
 C*      Specify that we would like IDATE values returned using 10 digits
 C*      (i.e. YYYYMMDDHHMM ).
@@ -121,14 +118,15 @@ C*      (i.e. YYYYMMDDHHMM ).
      
         ln=0 
 
-C*-----------------------------------------------------------------------
         DO WHILE  ( .true. )
 
 C*          Read the next BUFR message.
 
-           call readns(11,csubset,idate,ierr)
+           call readns(11, csubset, idate, ierr)
+
 c            write(*,*)' idate: ',idate,'  ',csubset
-            IF  ( ierr .eq.  -1 )  THEN
+
+            IF  ( ierr .ne.  0 )  THEN
                 write(*,*) '....all records read, Exit'
                 CALL CLOSBF  ( 11 )
                 Goto 1000 
@@ -138,7 +136,8 @@ c            write(*,*)' idate: ',idate,'  ',csubset
 
             DO WHILE  ( msgok )
 
-C*		    Read the next data subset from the BUFR message.
+C*		Read the next data subset from the BUFR message.
+
 		    IF (IREADSB (11) .ne. 0) THEN
 		        msgok = .false.
 		    ELSE
@@ -147,16 +146,16 @@ C*            At this point, we have a data subset within the
 C*            internal arrays of BUFRLIB, and we can now begin
 C*            reading actual data values:
 
-              CALL UFBINT  ( 11, r8arr, MXMN, MXLV, nlv, ostr(1))
-              CALL UFBINT  ( 11, r8arr2, MXMN, MXLV, nlv, ostr(2))
-              CALL UFBINT  ( 11, r8arr3, MXMN, MXLV, nlv, ostr(3))
-              CALL UFBINT  ( 11, r8arr4, MXMN, MXLV, nlv, ostr(4))
+              CALL UFBINT (11, r8arr,  MXMN, MXLV, nlv, ostr(1))
+              CALL UFBINT (11, r8arr2, MXMN, MXLV, nlv, ostr(2))
+              CALL UFBINT (11, r8arr3, MXMN, MXLV, nlv, ostr(3))
+              CALL UFBINT (11, r8arr4, MXMN, MXLV, nlv, ostr(4))
 
-            minu=int(r8arr3(2,1))
+            minu = int(r8arr3(2,1))
             write (unit=minute, FMT='(I2)') minu
 
             DO k=1,2
-               IF ( minute (k:k) .eq. ' ') THEN
+               IF (minute (k:k) .eq. ' ') THEN
                  minute (k:k) = '0'
                ENDIF
             ENDDO
@@ -173,25 +172,26 @@ C*            reading actual data values:
                  outstg (y:y) = 'm'
                ENDIF
               ENDDO
-
-              read(outstg,21,end=1000) M10,M1,M2,M3,M4,M5,M6
-              read(minute,22) M11
+              
+              read(outstg, 21, end=1000) M10,M1,M2,M3,M4,M5,M6
+              read(minute, 22) M11
 
 21            format(A10,76X,A6,1X,A7,1X,A6,1X,A7,1X,A5,2X,A5)            
 22            format(A2)
  
-              iflag =iflag+1
-              j=iflag
+              iflag = iflag+1
+              j = iflag
 
-              CALL READMval(M1,lat(j))
-              CALL READMval(M2,lon(j))
-              CALL READMval(M3,tt(j))
-              CALL READMval(M4,pr(j))
-              CALL READMval(M5,d(j))
-              CALL READMval(M6,v(j))
+              CALL READMval(M1, lat(j))
+              CALL READMval(M2, lon(j))
+              CALL READMval(M3, tt(j))
+              CALL READMval(M4, pr(j))
+              CALL READMval(M5, d(j))
+              CALL READMval(M6, v(j))
 
-              date(j)=M10
-              mins(j)=M11
+              date(j) = M10
+              mins(j) = M11
+
               if(pr(j) .ne. 0 .and. pr(j) < 99999 ) then
                 pr(j)= pr(j)/100
               end if
@@ -200,10 +200,6 @@ C*            reading actual data values:
             END IF
             END DO
         END DO
-
-C*-----------------------------------------------------------------------
-C* Write to output file
-C*-----------------------------------------------------------------------
 
 1000    if (iflag .ne. 0) then
           write(iou,fmt='(a10)') date_tag
@@ -224,8 +220,6 @@ C*-----------------------------------------------------------------------
 2000    stop 99999        
 
         END
-
-C*-----------------------------------------------------------------------
 
       SUBROUTINE READMval(M1,fl)
            character*8 M1
