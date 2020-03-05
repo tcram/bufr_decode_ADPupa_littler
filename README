@@ -1,15 +1,19 @@
-Last updated 14 October 2013
+Last updated 05 March 2020
 ds351.0 (NCEP ADP Global Upper Air Observation Subsets, daily Apr1998-continuing)
 
 Description and instructions to use the included extraction program:
 =================================================================================
 
 These individual programs can be used to extract general 
-atmospheric variables from adp BUFR files into simple text 
+atmospheric variables from NCEP ADP BUFR files into simple text 
 files.  
 
 To compile the BUFR libraries and extraction code, go to the 
 install directory. Execute the install.sh script to complete the compilations.
+The most recent version of BUFRLIB is required to compile this code; software
+download and installation instructions are provided at:
+
+https://www.emc.ncep.noaa.gov/index.php?branch=BUFRLIB
 
 The executables will be placed in the exe directory.  Execute
 the desired executable and enter the BUFR input file name to extract
@@ -20,7 +24,7 @@ exe/bufr_upa2ob.x:        used to convert gdas.adpupa.tHHz.YYYYMMHH.bufr files t
 exe/bufr_craft2ob.x:      used to convert gdas.aircft.tHHz.YYYYMMHH.bufr files to obs format.
 exe/bufr_aircar2ob.x:     used to convert gdas.aircar.tHHz.YYYYMMHH.bufr files to obs format.
 exe/bufr_sat2ob.x:        used to convert gdas.satwnd.tHHz.YYYYMMHH.bufr files to obs format.
-exe/runob2lit_imd_obs.x:  used to convert/combine obs format files into one littlr format file.
+exe/runob2lit_imd_obs.x:  used to convert/combine obs format files into one little_r format file.
 exe/files.txt  edit to include desired obs files to be input into the runob2lit_imd_obs.x program.
                example files are currently listed in the files.txt file. 
 
@@ -33,8 +37,8 @@ References:
 
 A guide to the BUFR libraries can be found at:
 
-http://www.nco.ncep.noaa.gov/dmqab/decoders/BUFRLIB/toc/
+https://www.emc.ncep.noaa.gov/index.php?branch=BUFRLIB
 
 Definitions for BUFR MNEMONIC headers can be found in the doc directory 
 and at: 
-http://www.emc.ncep.noaa.gov/mmb/data_processing/bufrtab_tableb.htm 		
+https://www.emc.ncep.noaa.gov/BUFRLIB/tables/bufrtab_tableb.html 		
