@@ -129,7 +129,7 @@ C*          Read the next BUFR message.
            call readns(11,csubset,idate,ierr)
 c            write(*,*)' idate: ',idate,'  ',csubset
             IF  ( ierr .eq.  -1 )  THEN
-                write(*,*) '....all records read, Exit'
+                write(*,*) '[bufr_sat2ob]....all records read, Exit'
                 CALL CLOSBF  ( 11 )
                 Goto 1000 
             END IF

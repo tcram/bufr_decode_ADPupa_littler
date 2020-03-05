@@ -66,8 +66,8 @@ c*
             elon = 180.
           END IF
         ELSE
-          write(*,*) 'Usage: bufr_aircar2ob.x gdas.adpsfc.t<HH>z.
-     +<YYYYMMDD>.bufr.be <YYYYMMDDHH> west_lon east_lon 
+          write(*,*) 'Usage: bufr_upa2ob.x gdas.adpupa.t<HH>z.
+     +<YYYYMMDD>.bufr <YYYYMMDDHH> west_lon east_lon 
      +south_lat north_lat'
           STOP
         END IF
@@ -134,7 +134,7 @@ C*           code = IUPBS1(MBAY,33)
 C*            write(*,*)' idate: ',idate,'  ',csubset,' ',code
 c            write(*,*)' idate: ',idate,'  ',csubset
             IF  ( ierr .eq.  -1 )  THEN
-                write(*,*) '....all records read, Exit'
+                write(*,*) '[bufr_upa2ob]....all records read, Exit'
                 CALL CLOSBF  ( 11 )
                 Goto 1000 
             END IF
