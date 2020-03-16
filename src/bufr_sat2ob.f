@@ -150,7 +150,7 @@ C*            reading actual data values:
                ENDIF
               ENDDO
 
-              read(outstg,21,end=1000) M10,M1,M2,M3,M4,M5,M6
+              read(outstg,21,end=2000) M10,M1,M2,M3,M4,M5,M6
               read(minute,22) M11
 
 21            format(A10,76X,A6,1X,A7,1X,A6,1X,A7,1X,A5,2X,A5)            
