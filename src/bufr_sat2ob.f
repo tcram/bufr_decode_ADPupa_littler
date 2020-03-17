@@ -24,7 +24,7 @@
 
         CHARACTER     csubset*8, inf*200, outstg*200
         CHARACTER*80  ostr(NSTR)
-        INTEGER       y, z, idate
+        INTEGER       y, z, idate, iflag
 
         ostr(1)='SAID GCLONG SCLF RPID'
         ostr(2)='SIDP SWCM YEAR MNTH DAYS'
@@ -78,7 +78,8 @@ C*      Open output file
         open(iou,file=fout,status='unknown',form='formatted')
         write(iou,fmt='(a10)') date_tag
 
-        nlev = 1
+        iflag=0
+        nlev=1
         dumm=99999.9
 
         isurf = 0
@@ -155,7 +156,10 @@ C*            reading actual data values:
 
 21            format(A10,76X,A6,1X,A7,1X,A6,1X,A7,1X,A5,2X,A5)            
 22            format(A2)
- 
+
+C*-----------------------------------------------------------------------
+c         Prepare output
+
               CALL READMval(M1,lat)
               CALL READMval(M2,lon)
               CALL READMval(M3,tt)
@@ -170,6 +174,10 @@ C*            reading actual data values:
               end if
 
 c        write to output file
+              if (iflag.eq.0) then
+                write(iou,fmt='(a10)') date_tag
+                iflag=1
+              endif
               if(slat<=lat .and. nlat>=lat .and. wlon<=lon .and. 
      &        elon>=lon) then
                  write(iou,111)isurf,dname,dname,date,mins,
