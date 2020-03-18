@@ -139,12 +139,13 @@ C*            reading actual data values:
             ENDDO
 
             DO z = 1,nlv
-              WRITE (UNIT=outstg, FMT='(I10,1x,A8, 
-     +          3(1X,F5.1),1X,A8,1X,F5.1, 
-     +          1X,F4.1,1X,F6.1,4(1x,F4.1),2(1X,F7.2),1X,F6.2,
-     +          1X,F7.1,1X,F5.1,1x,F6.2)') idate,csubset,
-     +          (r8arr(i,z), i = 1,4),(r8arr2(i,z), i = 1,5),
-     +          (r8arr3(i,z), i = 1,4),(r8arr4(i,z), i = 1,4)
+              WRITE (UNIT=outstg, FMT='(I10,1x,A8,3(1X,F5.1),1X,
+     +               A8,1X,F5.1,1X,F4.1,1X,F6.1,4(1x,F4.1),
+     +               2(1X,F7.2),1X,F6.2,1X,F7.1,1X,F5.1,1x,F6.2)') 
+     +               idate,csubset,
+     +               (r8arr(i,z), i = 1,4),(r8arr2(i,z), i = 1,5),
+     +               (r8arr3(i,z), i = 1,4),(r8arr4(i,z), i = 1,4)
+
               DO y = 1,200
                IF ( outstg (y:y) .eq. '*') THEN
                  outstg (y:y) = 'm'
@@ -188,6 +189,8 @@ c        write to output file
 111      format(i1,2(1x,a6),1x,a10,a2,4(f7.1,1x),i3,1x,i1)
 112      format(6(f7.1,1x))
 
+         print '(A132)', outstg
+         
             END DO
         END DO
 
