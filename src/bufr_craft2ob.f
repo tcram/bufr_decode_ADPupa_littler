@@ -115,7 +115,7 @@ c            write(*,*)' idate: ',idate,'  ',csubset
         IF (ierr .eq.  -1) THEN
           WRITE(*,*) '[bufr_craft2ob]....all records read, Exit'
           CALL CLOSBF(11)
-          GOTO 1000 
+          GOTO 2000 
         END IF
 
 C*      At this point, we have a data subset within the
