@@ -3,39 +3,30 @@
         PARAMETER       ( NVAR = 17 )
         PARAMETER       ( NSTR = 4 )
 
-        COMMON /BITBUF/ MAXBYT,IBIT,IBAY(5000),MBYT(32),MBAY(5000,32)
-
         REAL*8          r8arr ( MXMN, MXLV ), r8arr2(MXMN, MXLV ),
      +                  r8arr3 ( MXMN, MXLV ), r8arr4(MXMN, MXLV ) 
 
-        PARAMETER       ( MXBF = 16000 )
+        parameter(iu=9,iou=10)
 
-        parameter(iu=9,iou=10,nz=9999999)
-
-        dimension pr(nz),tt(nz),td(nz)
+        dimension pr,tt,td
         integer  xht,nlev,i, iargc, n,minu,k
         real  xpr,xu,xv
-        real  temp,v(nz),zx(nz),d(nz)
-        real  lat(nz), lon(nz)
+        real  temp,v,zx,d
+        real  lat, lon
         real xt,xtd
         character*30 fin,fout
-        character*10  date_tag,date(nz)
+        character*10  date_tag,date
         character*6 dname
-        character   argv*300,minute*2,M11*2,mins(nz)*2
+        character   argv*300,minute*2,M11*2,mins*2
         character*12 ilev
         character*12 M10,M1,M2,M3,M4,M5,M6
         real wlon,elon,slat,nlat
 
-        CHARACTER       cbfmsg*(MXBF),
-     +                  csubset*8, inf*200, outstg*200
+        CHARACTER       csubset*8, inf*200, outstg*200
 
         CHARACTER*80   ostr(NSTR)
 
-        INTEGER         ibfmsg ( MXBF / 4 ), ln, code,y,z,idate
-
-        LOGICAL         msgok
-
-        EQUIVALENCE     ( cbfmsg (1:4), ibfmsg (1) )
+        INTEGER        code,y,z,idate, iflag
 
         ostr(1)='SAID GCLONG SCLF RPID'
         ostr(2)='SIDP SWCM YEAR MNTH DAYS'
@@ -93,16 +84,14 @@ C*      Open output file
         ibogus = 0
         ter = dumm
         dslp= dumm
-        do k=1,nz
-         date(k)='MMMMMMMMMM'
-         mins(k)='MM' 
-          pr(k)=dumm
-          zx(k)=dumm
-          tt(k)=dumm
-          td(k)=dumm
-          d(k)=dumm
-          v(k)=dumm
-        enddo
+         date='MMMMMMMMMM'
+         mins='MM' 
+          pr=dumm
+          zx=dumm
+          tt=dumm
+          td=dumm
+          d=dumm
+          v=dumm
 
 C*      Identify BUFR file to the BUFRLIB software.  DX BUFR tables
 C*      are embedded within the first few messages of the BUFR file
@@ -116,8 +105,7 @@ C*      (i.e. YYYYMMDDHHMM ).
 
         CALL DATELEN  ( 10 )
      
-        ln=0 
-
+C*-----------------------------------------------------------------------
         DO WHILE  ( .true. )
 
 C*          Read the next BUFR message.
@@ -127,20 +115,10 @@ C*          Read the next BUFR message.
 c            write(*,*)' idate: ',idate,'  ',csubset
 
             IF  ( ierr .ne.  0 )  THEN
-                write(*,*) '....all records read, Exit'
+                write(*,*) '[decode_satwnd]....all records read, Exit'
                 CALL CLOSBF  ( 11 )
-                Goto 1000 
+                Goto 2000 
             END IF
-
-            msgok = .true.
-
-            DO WHILE  ( msgok )
-
-C*		Read the next data subset from the BUFR message.
-
-		    IF (IREADSB (11) .ne. 0) THEN
-		        msgok = .false.
-		    ELSE
 
 C*            At this point, we have a data subset within the
 C*            internal arrays of BUFRLIB, and we can now begin
@@ -179,48 +157,46 @@ C*            reading actual data values:
 21            format(A10,76X,A6,1X,A7,1X,A6,1X,A7,1X,A5,2X,A5)            
 22            format(A2)
  
-              iflag = iflag+1
-              j = iflag
+C*-----------------------------------------------------------------------
+c         Prepare output
 
-              CALL READMval(M1, lat(j))
-              CALL READMval(M2, lon(j))
-              CALL READMval(M3, tt(j))
-              CALL READMval(M4, pr(j))
-              CALL READMval(M5, d(j))
-              CALL READMval(M6, v(j))
+              CALL READMval(M1, lat)
+              CALL READMval(M2, lon)
+              CALL READMval(M3, tt)
+              CALL READMval(M4, pr)
+              CALL READMval(M5, d)
+              CALL READMval(M6, v)
 
-              date(j) = M10
-              mins(j) = M11
+              date = M10
+              mins = M11
 
-              if(pr(j) .ne. 0 .and. pr(j) < 99999 ) then
-                pr(j)= pr(j)/100
+              if(pr .ne. 0 .and. pr < 99999 ) then
+                pr= pr/100
               end if
 
-            END DO           
-            END IF
-            END DO
-        END DO
-
-1000    if (iflag .ne. 0) then
-          write(iou,fmt='(a10)') date_tag
- 
-          do k = 1,iflag
-           if(slat <= lat(k) .and. nlat >= lat(k) .and.
-     &      wlon <= lon(k) .and. elon >= lon(k)) then
-            write(iou,111)isurf,dname,dname,date(k),mins(k),
-     &        lat(k),lon(k),ter,dslp,nlev,ibogus
-            write(iou,112)pr(k),zx(k),tt(k),td(k),d(k),v(k)
-           endif
-          enddo
+c        write to output file
+              if (iflag.eq.0) then
+                write(iou,fmt='(a10)') date_tag
+                iflag=1
+              endif
+              if(slat<=lat .and. nlat>=lat .and. wlon<=lon .and. 
+     &        elon>=lon) then
+                 write(iou,111)isurf,dname,dname,date,mins,
+     &                         lat,lon,ter,dslp,nlev,ibogus
+                 write(iou,112)pr,zx,tt,td,d,v
+              endif
 111      format(i1,2(1x,a6),1x,a10,a2,4(f7.1,1x),i3,1x,i1)
 112      format(6(f7.1,1x))
 
-        endif
+            END DO
+        END DO
 
+C*-----------------------------------------------------------------------
 2000    stop 99999        
 
         END
 
+C*-----------------------------------------------------------------------
       SUBROUTINE READMval(M1,fl)
            character*8 M1
            dumm=99999.9
