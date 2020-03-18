@@ -1,16 +1,20 @@
 #!/bin/sh
 #  ------------------------------------------------------------------------
-#  This script will make bufrupprair.x which to extract data from ADP BUFR
-#  input files, and place the data into a basic text file.  It is used to
+#  This script will make executables to extract data from ADP BUFR
+#  input files, write the data into a basic text file, and convert
+#  the text files into LITTLE_R format.  It is used to
 #  extract data from these kinds of files:
 #      gdas.adpupa.tHHz.YYYYMMDD.bufr 
 #      gdas.aircft.tHHz.YYYYMMDD.bufr
 #      gdas.satwnd.tHHz.YYYYMMDD.bufr 
 #      gdas.aircar.tHHz.YYYYMMDD.bufr
 #
-#  dumpbufr.x:        used to dump all contents of a BUFR file.
-#  ** Make sure the "ar" command location has been set in your path
-#  environment variable.  Type "which ar" to check if this is done. **
+#  bufr_upa2ob.x:       decodes ADPUPA observations and writes to a text file
+#  bufr_aircar2ob.x:    decodes AIRCAR observations and writes to a text file
+#  bufr_craft2ob.x:     decodes AIRCFT observations and writes to a text file
+#  bufr_sat2ob.x:       decodes SATWND observations and writes to a text file
+#  runob2lit_imd_obs.x: reads observation text files and converts to little_r format
+#  dumpbufr.x:          used to dump all contents of a BUFR file.
 #  ------------------------------------------------------------------------
  
 set -eua
@@ -21,16 +25,9 @@ set -eua
  
 CPLAT=linux
 SRC=../src
-LIB=../lib
+LIB=/path/to/BUFRLIB
 EXE=../exe
 INSTALL=.
-
-#  different platforms use different link name protocols
-#  -----------------------------------------------------
-
-# if using linux, BUFR files must be run through the "grabbufr/grabbufr.sh" script
-# with the resulting output used as input for the decoders.  Set appropriate compiler
-# in grabbufr.sh, and exe/convert.csh
  
 cflag=""
 fflag=""
@@ -42,17 +39,6 @@ then
    fflag=" -O3 -DUNDERSCORE -fno-second-underscore -w"
    cflag=" -O3 -DUNDERSCORE -w"
 fi
-
-#  Compile and archive the Bufr Library
-#  ------------------------------------
-echo "Compiling BUFRLIB Library..."
-cd $LIB
-if [ -e bufrlib.a ]
-then
-  rm bufrlib.a
-fi
-$LIB/makebufrlib.sh
-cd $INSTALL
 
 #  Compile the decode programs
 #  ---------------------------------------
@@ -79,6 +65,7 @@ $FC $fflag -o $EXE/bufr_craft2ob.x bufr_craft2ob.o $LIB/bufrlib.a
 $FC $fflag -o $EXE/bufr_sat2ob.x bufr_sat2ob.o $LIB/bufrlib.a
 
 $FC $fflag -o $EXE/runob2lit_imd_obs.x runob2lit_imd_obs.o
+
 #  clean up
 #  --------
 
